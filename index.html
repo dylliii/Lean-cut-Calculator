@@ -1,47 +1,107 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lean Cut & Recomp Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lean-Cut & Recomp Calculator</title>
 <style>
-body {font-family: Arial, sans-serif; background: #f9fafc; margin: 20px; color: #222;}
-.container {max-width: 420px; margin: auto; background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);}
-h2 {text-align: center; color: #333;}
-label {display: block; margin-top: 12px;}
-input, select {width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px;}
-button {margin-top: 20px; background: #1e90ff; color: white; border: none; padding: 10px; border-radius: 5px; width: 100%; cursor: pointer;}
-button:hover {background: #0074e8;}
-.result {margin-top: 25px; background: #eef6ff; padding: 15px; border-radius: 5px;}
-.result p {margin: 6px 0;}
+  :root{
+    --bg:#f5f7fa; --fg:#222; --card:#fff; --accent:#0078ff; --muted:#667085; --soft:#eef5ff; --border:#d7dbe3;
+  }
+  [data-theme="dark"]{
+    --bg:#0f172a; --fg:#e5e7eb; --card:#121a2e; --accent:#3b82f6; --muted:#9aa4b2; --soft:#0b254b; --border:#263247;
+  }
+  *{box-sizing:border-box}
+  body{font-family:"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--fg);margin:0;padding:20px}
+  .container{max-width:560px;background:var(--card);margin:auto;padding:26px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.12)}
+  h2{margin:2px 0 14px;text-align:center}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  label{display:block;margin-top:12px;font-weight:600}
+  input,select{width:100%;padding:10px;margin-top:6px;border:1px solid var(--border);border-radius:10px;background:transparent;color:var(--fg)}
+  select option{color:#111}
+  .seg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px}
+  .btns{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-top:16px}
+  button{background:var(--accent);color:#fff;border:none;padding:12px;border-radius:10px;font-size:15px;cursor:pointer}
+  button.secondary{background:#e9f2ff;color:#004a99}
+  [data-theme="dark"] button.secondary{background:#17386a;color:#cfe1ff}
+  button.ghost{background:#f1f3f5;color:#222}
+  [data-theme="dark"] button.ghost{background:#1b243b;color:#e5e7eb}
+  .result{margin-top:18px;background:var(--soft);padding:16px;border-radius:10px}
+  .result p{margin:8px 0}
+  .muted{color:var(--muted);font-size:13px}
+  textarea{width:100%;min-height:140px;border:1px solid var(--border);border-radius:10px;padding:10px;margin-top:10px;background:transparent;color:var(--fg);font-family:ui-monospace,Menlo,monospace}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .switch{display:inline-flex;align-items:center;gap:8px;font-size:13px}
+  .switch input{width:auto;margin:0}
+  footer{margin-top:16px;text-align:center;color:var(--muted);font-size:12px}
+  @media (max-width:520px){ .row,.seg,.btns{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
 <div class="container">
-  <h2>Lean Cut & Recomp Calculator</h2>
-  <label>Weight (kg)</label>
-  <input type="number" id="weight" placeholder="e.g. 70" />
-  
-  <label>Height (cm)</label>
-  <input type="number" id="height" placeholder="e.g. 170" />
-  
-  <label>Age (yrs)</label>
-  <input type="number" id="age" placeholder="e.g. 25" />
-  
-  <label>Sex</label>
-  <select id="sex">
-    <option value="male">Male</option>
-    <option value="female">Female</option>
-  </select>
+  <div class="topbar">
+    <div class="switch">
+      <label for="unitSystem"><b>Units</b></label>
+      <select id="unitSystem">
+        <option value="metric">Metric (kg, cm)</option>
+        <option value="imperial">Imperial (lb, in)</option>
+      </select>
+    </div>
+    <div class="switch">
+      <label for="darkToggle">Dark mode</label>
+      <input type="checkbox" id="darkToggle" />
+    </div>
+  </div>
 
-  <label>Activity Level</label>
+  <h2>Lean-Cut & Recomp Calculator</h2>
+
+  <div class="row">
+    <div>
+      <label id="wLabel">Weight (kg)</label>
+      <input type="number" id="weight" placeholder="e.g. 73" step="0.1">
+    </div>
+    <div>
+      <label id="hLabel">Height (cm)</label>
+      <input type="number" id="height" placeholder="e.g. 170" step="0.1">
+    </div>
+  </div>
+
+  <div class="row">
+    <div>
+      <label>Age (yrs)</label>
+      <input type="number" id="age" placeholder="e.g. 25">
+    </div>
+    <div>
+      <label>Sex</label>
+      <select id="sex">
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+      </select>
+    </div>
+  </div>
+
+  <label>Activity Level (job / lifestyle)</label>
   <select id="activity">
-    <option value="1.2">Sedentary (desk job, little exercise)</option>
+    <option value="1.2">Sedentary (desk job, little movement)</option>
     <option value="1.375">Light (1–3 workouts/week)</option>
     <option value="1.55">Moderate (3–5 workouts/week)</option>
     <option value="1.725">Active (6–7 workouts/week)</option>
-    <option value="1.9">Very active (physical job + training)</option>
+    <option value="1.9">Very Active (physical job + training)</option>
   </select>
+
+  <div class="row">
+    <div>
+      <label>Steps Today</label>
+      <input type="number" id="steps" placeholder="e.g. 10000">
+    </div>
+    <div>
+      <label>Gym Session Today?</label>
+      <select id="gym">
+        <option value="0">No</option>
+        <option value="1">Yes</option>
+      </select>
+    </div>
+  </div>
 
   <label>Goal</label>
   <select id="goal">
@@ -50,46 +110,248 @@ button:hover {background: #0074e8;}
     <option value="maintain">Maintain weight</option>
   </select>
 
-  <button onclick="calculate()">Calculate</button>
+  <div class="btns">
+    <button onclick="calculate()">Calculate</button>
+    <button class="secondary" onclick="copyToClipboard()">Copy Summary</button>
+    <button class="ghost" onclick="downloadTxt()">Download .txt</button>
+    <button class="ghost" onclick="downloadCSV()">Download .csv</button>
+  </div>
 
   <div class="result" id="result"></div>
+
+  <label class="muted">Shareable summary</label>
+  <textarea id="summary" placeholder="Click Calculate to generate a summary you can paste into MyFitnessPal notes…"></textarea>
+
+  <footer>© 2025 Lean-Cut Calculator — export & paste into MyFitnessPal diary notes.</footer>
 </div>
 
 <script>
-function calculate() {
-  const w = parseFloat(document.getElementById('weight').value);
-  const h = parseFloat(document.getElementById('height').value);
-  const a = parseFloat(document.getElementById('age').value);
-  const sex = document.getElementById('sex').value;
-  const activity = parseFloat(document.getElementById('activity').value);
-  const goal = document.getElementById('goal').value;
-  if(!w || !h || !a) {alert("Please fill all fields"); return;}
+/* ---------- helpers ---------- */
+const $ = (id)=>document.getElementById(id);
+const round = (n)=>Math.round(n);
+const two = (n)=>Math.round(n*100)/100;
 
-  // Mifflin-St Jeor BMR
-  let BMR = sex === "male" ? 10*w + 6.25*h - 5*a + 5 : 10*w + 6.25*h - 5*a - 161;
-  let TDEE = BMR * activity;
-
-  let targetCal = TDEE;
-  if(goal === "cut") targetCal = TDEE - 500;
-  if(goal === "recomp") targetCal = TDEE - 350;
-
-  // Macros
-  let protein = w * 2.2; // g
-  let fat = (targetCal * 0.25) / 9;
-  let carbs = (targetCal - (protein*4 + fat*9)) / 4;
-
-  // Round
-  const r = (n) => Math.round(n);
-  document.getElementById('result').innerHTML = `
-    <p><b>BMR:</b> ${r(BMR)} kcal/day</p>
-    <p><b>TDEE (Maintenance):</b> ${r(TDEE)} kcal/day</p>
-    <p><b>Target Calories (${goal}):</b> ${r(targetCal)} kcal/day</p>
-    <hr>
-    <p><b>Protein:</b> ${r(protein)} g</p>
-    <p><b>Carbs:</b> ${r(carbs)} g</p>
-    <p><b>Fat:</b> ${r(fat)} g</p>
-  `;
+function toMetricFromImperial(weightLb, heightIn){
+  return { kg: weightLb/2.2046226218, cm: heightIn*2.54 };
 }
+function toImperialFromMetric(weightKg, heightCm){
+  return { lb: weightKg*2.2046226218, in: heightCm/2.54 };
+}
+function calcBMR(sex,w,h,a){ // Mifflin-St Jeor
+  return sex==="male" ? 10*w + 6.25*h - 5*a + 5 : 10*w + 6.25*h - 5*a - 161;
+}
+
+/* ---------- unit system toggle with live conversion ---------- */
+const unitSystem = $("unitSystem");
+const darkToggle = $("darkToggle");
+const wInput = $("weight");
+const hInput = $("height");
+const wLabel = $("wLabel");
+const hLabel = $("hLabel");
+
+let currentUnit = "metric"; // default
+
+unitSystem.addEventListener("change", ()=>{
+  const newUnit = unitSystem.value;
+  if(newUnit===currentUnit) return;
+
+  const wVal = parseFloat(wInput.value);
+  const hVal = parseFloat(hInput.value);
+
+  if(newUnit==="imperial"){ // convert existing metric to imperial
+    if(!isNaN(wVal)) wInput.value = two(toImperialFromMetric(wVal, 0).lb);
+    if(!isNaN(hVal)) hInput.value = two(toImperialFromMetric(0, hVal).in);
+    wLabel.textContent = "Weight (lb)";
+    hLabel.textContent = "Height (in)";
+    currentUnit = "imperial";
+  } else { // convert imperial to metric
+    if(!isNaN(wVal)) wInput.value = two(toMetricFromImperial(wVal, 0).kg);
+    if(!isNaN(hVal)) hInput.value = two(toMetricFromImperial(0, hVal).cm);
+    wLabel.textContent = "Weight (kg)";
+    hLabel.textContent = "Height (cm)";
+    currentUnit = "metric";
+  }
+  updateURLParams();
+});
+
+/* ---------- dark mode ---------- */
+function applyTheme(){
+  const theme = localStorage.getItem("theme") || "light";
+  document.documentElement.setAttribute("data-theme", theme);
+  darkToggle.checked = theme==="dark";
+}
+darkToggle.addEventListener("change", ()=>{
+  const theme = darkToggle.checked ? "dark" : "light";
+  localStorage.setItem("theme", theme);
+  applyTheme();
+});
+applyTheme();
+
+/* ---------- calculator ---------- */
+function calculate(){
+  // read
+  let w = parseFloat(wInput.value);
+  let h = parseFloat(hInput.value);
+  const a = parseFloat($("age").value);
+  const sex = $("sex").value;
+  const activity = parseFloat($("activity").value);
+  const steps = parseFloat($("steps").value)||0;
+  const gym = parseInt($("gym").value);
+  const goal = $("goal").value;
+
+  if(!w || !h || !a){ alert("Please fill in weight, height, and age."); return; }
+
+  // convert to metric if user entered imperial
+  if(currentUnit==="imperial"){
+    const m = toMetricFromImperial(w, h);
+    w = m.kg; h = m.cm;
+  }
+
+  // 1) BMR & TDEE
+  const BMR = calcBMR(sex,w,h,a);
+  const TDEE = BMR * activity;
+
+  // 2) Activity adjustments (simple robust model)
+  const stepBurn = (steps/1000)*30;   // ~30 kcal per 1k steps
+  const gymBurn  = gym*280;           // ~45 min strength
+  const totalBurn = TDEE + stepBurn + gymBurn;
+
+  // 3) Goal
+  let targetCal = totalBurn;
+  if(goal==="cut")    targetCal -= 550;
+  if(goal==="recomp") targetCal -= 400;
+
+  // 4) Macros (protein 2.2 g/kg; fat 25% kcal; carbs remainder)
+  const protein = w*2.2;
+  const fat = (targetCal*0.25)/9;
+  const carbs = Math.max(0, (targetCal - (protein*4 + fat*9))/4);
+
+  // 5) Weekly fat loss estimate
+  const deficit = Math.max(0, totalBurn - targetCal);
+  const weeklyLoss = deficit*7/7700;
+
+  // display
+  $("result").innerHTML = `
+    <p><b>BMR:</b> ${round(BMR)} kcal/day</p>
+    <p><b>TDEE (Maintenance):</b> ${round(TDEE)} kcal/day</p>
+    <p><b>Extra from Steps:</b> ${round(stepBurn)} kcal</p>
+    <p><b>Extra from Gym:</b> ${round(gymBurn)} kcal</p>
+    <hr>
+    <p><b>Total Daily Burn:</b> ${round(totalBurn)} kcal</p>
+    <p><b>Target Calories (${goal}):</b> ${round(targetCal)} kcal/day</p>
+    <hr>
+    <p><b>Macros:</b> Protein ${round(protein)} g • Carbs ${round(carbs)} g • Fat ${round(fat)} g</p>
+    <p class="muted">Est. weekly fat loss: ${two(weeklyLoss)} kg/week (if target is followed).</p>
+  `;
+
+  const unitNote = currentUnit==="metric" ? "kg/cm" : "lb/in";
+  const summary = [
+    `Lean-Cut & Recomp — Daily Target`,
+    `Inputs (${unitNote}): Weight=${two(currentUnit==="metric"?w:toImperialFromMetric(w,0).lb)} | Height=${two(currentUnit==="metric"?h:toImperialFromMetric(0,h).in)} | Age=${a} | Sex=${sex}`,
+    `Activity Multiplier: ${activity} | Steps: ${steps} | Gym: ${gym ? "Yes" : "No"} | Goal: ${goal}`,
+    ``,
+    `BMR: ${round(BMR)} kcal`,
+    `Maintenance (TDEE): ${round(TDEE)} kcal`,
+    `+ Steps: ${round(stepBurn)} kcal | + Gym: ${round(gymBurn)} kcal`,
+    `Total Daily Burn: ${round(totalBurn)} kcal`,
+    `Target Calories: ${round(targetCal)} kcal/day`,
+    `Macros → Protein: ${round(protein)} g | Carbs: ${round(carbs)} g | Fat: ${round(fat)} g`,
+    `Est. weekly fat loss: ${two(weeklyLoss)} kg/week`,
+    ``,
+    `MyFitnessPal tip: paste this into your diary notes for today.`
+  ].join("\n");
+  $("summary").value = summary;
+
+  updateURLParams();
+}
+
+/* ---------- exports ---------- */
+function copyToClipboard(){
+  const ta = $("summary");
+  if(!ta.value.trim()){ alert("Please click Calculate first."); return; }
+  ta.select(); ta.setSelectionRange(0, 99999);
+  navigator.clipboard.writeText(ta.value).then(()=>alert("Copied! Paste into MyFitnessPal notes."));
+}
+function downloadTxt(){
+  const txt = $("summary").value.trim();
+  if(!txt){ alert("Please click Calculate first."); return; }
+  const blob = new Blob([txt], {type:"text/plain;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `lean-cut-summary-${new Date().toISOString().split("T")[0]}.txt`;
+  document.body.appendChild(a); a.click(); URL.revokeObjectURL(url); a.remove();
+}
+function downloadCSV(){
+  // minimal CSV of key outputs & inputs
+  const fields = [
+    "date","unit_system","weight","height","age","sex","activity","steps","gym","goal",
+    "BMR","TDEE","step_kcal","gym_kcal","total_burn","target_kcal","protein_g","carbs_g","fat_g","weekly_loss_kg"
+  ];
+  // pull latest computed values by re-running silently (requires fields present)
+  const wRaw = parseFloat(wInput.value), hRaw = parseFloat(hInput.value);
+  const a = parseFloat($("age").value); const sex = $("sex").value;
+  const activity = parseFloat($("activity").value);
+  const steps = parseFloat($("steps").value)||0; const gym = parseInt($("gym").value);
+  const goal = $("goal").value;
+
+  if(!wRaw || !hRaw || !a){ alert("Please fill inputs and Calculate first."); return; }
+
+  let w=wRaw, h=hRaw;
+  if(currentUnit==="imperial"){ const m=toMetricFromImperial(wRaw,hRaw); w=m.kg; h=m.cm; }
+
+  const BMR = calcBMR(sex,w,h,a);
+  const TDEE = BMR*activity;
+  const stepBurn = (steps/1000)*30;
+  const gymBurn = gym*280;
+  const totalBurn = TDEE + stepBurn + gymBurn;
+  let targetCal = totalBurn; if(goal==="cut") targetCal -= 550; if(goal==="recomp") targetCal -= 400;
+  const protein = w*2.2; const fat=(targetCal*0.25)/9; const carbs=Math.max(0,(targetCal-(protein*4+fat*9))/4);
+  const weeklyLoss = Math.max(0,(totalBurn-targetCal))*7/7700;
+
+  const values = [
+    new Date().toISOString().split("T")[0],
+    currentUnit,
+    two(wRaw), two(hRaw), a, sex, activity, steps, gym, goal,
+    round(BMR), round(TDEE), round(stepBurn), round(gymBurn), round(totalBurn), round(targetCal),
+    round(protein), round(carbs), round(fat), two(weeklyLoss)
+  ];
+  const csv = [fields.join(","), values.join(",")].join("\n");
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
+  const url = URL.createObjectURL(blob); const aEl = document.createElement("a");
+  aEl.href = url; aEl.download = `lean-cut-results-${new Date().toISOString().split("T")[0]}.csv`;
+  document.body.appendChild(aEl); aEl.click(); URL.revokeObjectURL(url); aEl.remove();
+}
+
+/* ---------- shareable URL params ---------- */
+function updateURLParams(){
+  const params = new URLSearchParams({
+    unit: currentUnit,
+    weight: wInput.value,
+    height: hInput.value,
+    age: $("age").value,
+    sex: $("sex").value,
+    activity: $("activity").value,
+    steps: $("steps").value,
+    gym: $("gym").value,
+    goal: $("goal").value,
+    theme: document.documentElement.getAttribute("data-theme")
+  });
+  history.replaceState(null,"",`${location.pathname}?${params.toString()}`);
+}
+(function initFromQuery(){
+  const q = new URLSearchParams(location.search);
+  const set = (id,val)=>{ if(val!==null) $(id).value = val; };
+  const unit = q.get("unit");
+  if(unit && (unit==="metric"||unit==="imperial")){
+    unitSystem.value = unit; unitSystem.dispatchEvent(new Event("change"));
+  }
+  ["weight","height","age","sex","activity","steps","gym","goal"].forEach(k=>{
+    if(q.has(k)) set(k,q.get(k));
+  });
+  const theme = q.get("theme");
+  if(theme){ localStorage.setItem("theme", theme); applyTheme(); }
+})();
 </script>
 </body>
 </html>
