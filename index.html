@@ -2,356 +2,410 @@
 <html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Lean-Cut & Recomp Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <style>
   :root{
-    --bg:#f5f7fa; --fg:#222; --card:#fff; --accent:#0078ff; --muted:#667085; --soft:#eef5ff; --border:#d7dbe3;
+    --bg: #f7f8fb;
+    --fg: #101418;
+    --muted:#6a7280;
+    --card:#ffffff;
+    --accent:#2563eb;
+    --soft:#eef2ff;
+    --border:#e6e8ee;
+
+    --radius:16px;
+    --shadow: 0 12px 40px rgba(0,0,0,.06);
+    --shadow-sm: 0 6px 20px rgba(0,0,0,.05);
   }
   [data-theme="dark"]{
-    --bg:#0f172a; --fg:#e5e7eb; --card:#121a2e; --accent:#3b82f6; --muted:#9aa4b2; --soft:#0b254b; --border:#263247;
+    --bg:#0b1220; --fg:#e6e8ee; --muted:#98a1b3; --card:#101827;
+    --accent:#3b82f6; --soft:#0f1b34; --border:#1f2a3d;
+    --shadow: 0 12px 40px rgba(0,0,0,.35);
+    --shadow-sm: 0 6px 20px rgba(0,0,0,.28);
   }
+
   *{box-sizing:border-box}
-  body{font-family:"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--fg);margin:0;padding:20px}
-  .container{max-width:560px;background:var(--card);margin:auto;padding:26px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.12)}
-  h2{margin:2px 0 14px;text-align:center}
-  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  label{display:block;margin-top:12px;font-weight:600}
-  input,select{width:100%;padding:10px;margin-top:6px;border:1px solid var(--border);border-radius:10px;background:transparent;color:var(--fg)}
-  select option{color:#111}
-  .seg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px}
-  .btns{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-top:16px}
-  button{background:var(--accent);color:#fff;border:none;padding:12px;border-radius:10px;font-size:15px;cursor:pointer}
-  button.secondary{background:#e9f2ff;color:#004a99}
-  [data-theme="dark"] button.secondary{background:#17386a;color:#cfe1ff}
-  button.ghost{background:#f1f3f5;color:#222}
-  [data-theme="dark"] button.ghost{background:#1b243b;color:#e5e7eb}
-  .result{margin-top:18px;background:var(--soft);padding:16px;border-radius:10px}
-  .result p{margin:8px 0}
-  .muted{color:var(--muted);font-size:13px}
-  textarea{width:100%;min-height:140px;border:1px solid var(--border);border-radius:10px;padding:10px;margin-top:10px;background:transparent;color:var(--fg);font-family:ui-monospace,Menlo,monospace}
-  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-  .switch{display:inline-flex;align-items:center;gap:8px;font-size:13px}
-  .switch input{width:auto;margin:0}
-  footer{margin-top:16px;text-align:center;color:var(--muted);font-size:12px}
-  @media (max-width:520px){ .row,.seg,.btns{grid-template-columns:1fr} }
+  html,body{height:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--fg);
+    font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
+                 Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    line-height:1.4; letter-spacing:.2px;
+    padding:28px;
+  }
+
+  .wrap{max-width:760px; margin:0 auto;}
+  .card{
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--radius); box-shadow:var(--shadow); padding:28px;
+  }
+  header{
+    display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;
+  }
+  .brand{font-size:20px; font-weight:700; letter-spacing:.2px}
+  .controls{display:flex; gap:14px; align-items:center}
+  .select, .switch {
+    display:flex; align-items:center; gap:8px; font-size:14px; color:var(--muted);
+    background:transparent; border:1px solid var(--border); padding:8px 12px;
+    border-radius:12px; box-shadow:var(--shadow-sm);
+  }
+  select, input[type="number"], input[type="checkbox"]{
+    background:transparent; border:none; color:var(--fg); font-size:15px; outline:none;
+  }
+  main{display:grid; grid-template-columns:1fr; gap:18px}
+
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+  .field{display:flex; flex-direction:column; gap:8px; background:transparent}
+  .label{font-size:13px; color:var(--muted)}
+  .input{
+    border:1px solid var(--border); border-radius:12px; padding:14px; font-size:16px;
+    background:transparent; box-shadow:var(--shadow-sm);
+  }
+  .note{font-size:12px; color:var(--muted); margin-top:4px}
+
+  .row{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+  .row-3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px}
+
+  .btns{display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:10px}
+  button{
+    appearance:none; border:none; cursor:pointer; padding:14px 16px; border-radius:12px;
+    font-size:15px; font-weight:600; letter-spacing:.2px; transition:.15s ease;
+    box-shadow:var(--shadow-sm);
+  }
+  .primary{background:var(--accent); color:#fff}
+  .secondary{background:#e9efff; color:#0a3ea8}
+  [data-theme="dark"] .secondary{background:#142a52; color:#cfe0ff}
+  .ghost{background:#f3f5f8; color:var(--fg)}
+  [data-theme="dark"] .ghost{background:#172339}
+
+  .result{background:var(--soft); border-radius:14px; padding:18px; margin-top:6px}
+  .kvs{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+  .kv{background:transparent; border:1px dashed var(--border); border-radius:12px; padding:12px}
+  .kv b{display:block; font-size:13px; color:var(--muted); margin-bottom:6px}
+  .kv span{font-size:18px; font-weight:700}
+
+  textarea{
+    width:100%; min-height:160px; padding:14px; border:1px solid var(--border);
+    border-radius:12px; background:transparent; color:var(--fg);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size:14px; box-shadow:var(--shadow-sm);
+  }
+
+  footer{margin-top:16px; text-align:center; color:var(--muted); font-size:12px}
+
+  @media (max-width:760px){
+    body{padding:16px}
+    .grid,.row,.row-3,.btns{grid-template-columns:1fr}
+  }
 </style>
 </head>
 <body>
-<div class="container">
-  <div class="topbar">
-    <div class="switch">
-      <label for="unitSystem"><b>Units</b></label>
-      <select id="unitSystem">
-        <option value="metric">Metric (kg, cm)</option>
-        <option value="imperial">Imperial (lb, in)</option>
-      </select>
-    </div>
-    <div class="switch">
-      <label for="darkToggle">Dark mode</label>
-      <input type="checkbox" id="darkToggle" />
-    </div>
+<div class="wrap">
+  <div class="card">
+    <header>
+      <div class="brand">Lean-Cut & Recomp</div>
+      <div class="controls">
+        <div class="select">
+          <span>Units</span>
+          <select id="unitSystem">
+            <option value="metric">Metric (kg, cm)</option>
+            <option value="imperial">Imperial (lb, in)</option>
+          </select>
+        </div>
+        <div class="select">
+          <span>Theme</span>
+          <select id="themeSelect">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="grid">
+        <div class="field">
+          <div class="label" id="wLabel">Weight (kg)</div>
+          <input class="input" type="number" id="weight" step="0.1" placeholder="e.g. 73">
+        </div>
+        <div class="field">
+          <div class="label" id="hLabel">Height (cm)</div>
+          <input class="input" type="number" id="height" step="0.1" placeholder="e.g. 170">
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="field">
+          <div class="label">Age</div>
+          <input class="input" type="number" id="age" placeholder="e.g. 25">
+        </div>
+        <div class="field">
+          <div class="label">Sex</div>
+          <select class="input" id="sex">
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </div>
+      </section>
+
+      <section>
+        <div class="field">
+          <div class="label">Activity level (job / lifestyle)</div>
+          <select class="input" id="activity">
+            <option value="1.2">Sedentary (desk job, little movement)</option>
+            <option value="1.375">Light (1–3 workouts/week)</option>
+            <option value="1.55">Moderate (3–5 workouts/week)</option>
+            <option value="1.725">Active (6–7 workouts/week)</option>
+            <option value="1.9">Very Active (physical job + training)</option>
+          </select>
+          <div class="note">Tip: this is your baseline before steps/gym.</div>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="field">
+          <div class="label">Steps today</div>
+          <input class="input" type="number" id="steps" placeholder="e.g. 10000">
+        </div>
+        <div class="field">
+          <div class="label">Gym session today?</div>
+          <select class="input" id="gym">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+          </select>
+        </div>
+      </section>
+
+      <section>
+        <div class="field">
+          <div class="label">Goal</div>
+          <select class="input" id="goal">
+            <option value="recomp">Recomp (slow fat loss + muscle gain)</option>
+            <option value="cut">Cut (faster fat loss)</option>
+            <option value="maintain">Maintain weight</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="btns">
+        <button class="primary" onclick="calculate()">Calculate</button>
+        <button class="secondary" onclick="copyToClipboard()">Copy</button>
+        <button class="ghost" onclick="downloadTxt()">.txt</button>
+        <button class="ghost" onclick="downloadCSV()">.csv</button>
+      </section>
+
+      <section class="result" id="result">
+        <!-- results appear here -->
+      </section>
+
+      <section>
+        <div class="field">
+          <div class="label">Shareable summary</div>
+          <textarea id="summary" placeholder="Click Calculate to generate your summary..."></textarea>
+        </div>
+      </section>
+    </main>
+    <footer>© 2025 — minimal · spacious · distraction-free</footer>
   </div>
-
-  <h2>Lean-Cut & Recomp Calculator</h2>
-
-  <div class="row">
-    <div>
-      <label id="wLabel">Weight (kg)</label>
-      <input type="number" id="weight" placeholder="e.g. 73" step="0.1">
-    </div>
-    <div>
-      <label id="hLabel">Height (cm)</label>
-      <input type="number" id="height" placeholder="e.g. 170" step="0.1">
-    </div>
-  </div>
-
-  <div class="row">
-    <div>
-      <label>Age (yrs)</label>
-      <input type="number" id="age" placeholder="e.g. 25">
-    </div>
-    <div>
-      <label>Sex</label>
-      <select id="sex">
-        <option value="male">Male</option>
-        <option value="female">Female</option>
-      </select>
-    </div>
-  </div>
-
-  <label>Activity Level (job / lifestyle)</label>
-  <select id="activity">
-    <option value="1.2">Sedentary (desk job, little movement)</option>
-    <option value="1.375">Light (1–3 workouts/week)</option>
-    <option value="1.55">Moderate (3–5 workouts/week)</option>
-    <option value="1.725">Active (6–7 workouts/week)</option>
-    <option value="1.9">Very Active (physical job + training)</option>
-  </select>
-
-  <div class="row">
-    <div>
-      <label>Steps Today</label>
-      <input type="number" id="steps" placeholder="e.g. 10000">
-    </div>
-    <div>
-      <label>Gym Session Today?</label>
-      <select id="gym">
-        <option value="0">No</option>
-        <option value="1">Yes</option>
-      </select>
-    </div>
-  </div>
-
-  <label>Goal</label>
-  <select id="goal">
-    <option value="recomp">Recomp (slow fat loss + muscle gain)</option>
-    <option value="cut">Cut (faster fat loss)</option>
-    <option value="maintain">Maintain weight</option>
-  </select>
-
-  <div class="btns">
-    <button onclick="calculate()">Calculate</button>
-    <button class="secondary" onclick="copyToClipboard()">Copy Summary</button>
-    <button class="ghost" onclick="downloadTxt()">Download .txt</button>
-    <button class="ghost" onclick="downloadCSV()">Download .csv</button>
-  </div>
-
-  <div class="result" id="result"></div>
-
-  <label class="muted">Shareable summary</label>
-  <textarea id="summary" placeholder="Click Calculate to generate a summary you can paste into MyFitnessPal notes…"></textarea>
-
-  <footer>© 2025 Lean-Cut Calculator — export & paste into MyFitnessPal diary notes.</footer>
 </div>
 
 <script>
-/* ---------- helpers ---------- */
-const $ = (id)=>document.getElementById(id);
-const round = (n)=>Math.round(n);
-const two = (n)=>Math.round(n*100)/100;
+  // helpers
+  const $ = (id)=>document.getElementById(id);
+  const round = (n)=>Math.round(n);
+  const two = (n)=>Math.round(n*100)/100;
 
-function toMetricFromImperial(weightLb, heightIn){
-  return { kg: weightLb/2.2046226218, cm: heightIn*2.54 };
-}
-function toImperialFromMetric(weightKg, heightCm){
-  return { lb: weightKg*2.2046226218, in: heightCm/2.54 };
-}
-function calcBMR(sex,w,h,a){ // Mifflin-St Jeor
-  return sex==="male" ? 10*w + 6.25*h - 5*a + 5 : 10*w + 6.25*h - 5*a - 161;
-}
+  function toMetricFromImperial(lb, inch){ return { kg: lb/2.2046226218, cm: inch*2.54 }; }
+  function toImperialFromMetric(kg, cm){ return { lb: kg*2.2046226218, in: cm/2.54 }; }
+  function calcBMR(sex,w,h,a){ return sex==="male" ? 10*w + 6.25*h - 5*a + 5 : 10*w + 6.25*h - 5*a - 161; }
 
-/* ---------- unit system toggle with live conversion ---------- */
-const unitSystem = $("unitSystem");
-const darkToggle = $("darkToggle");
-const wInput = $("weight");
-const hInput = $("height");
-const wLabel = $("wLabel");
-const hLabel = $("hLabel");
+  // state & elements
+  const unitSel = $("unitSystem");
+  const themeSel = $("themeSelect");
+  const wLabel = $("wLabel"), hLabel = $("hLabel");
+  const wInput = $("weight"), hInput = $("height");
 
-let currentUnit = "metric"; // default
+  let currentUnit = "metric";
 
-unitSystem.addEventListener("change", ()=>{
-  const newUnit = unitSystem.value;
-  if(newUnit===currentUnit) return;
+  // theme
+  function applyTheme(th){ document.documentElement.setAttribute("data-theme", th); localStorage.setItem("theme", th); }
+  themeSel.addEventListener("change", ()=>applyTheme(themeSel.value));
+  applyTheme(localStorage.getItem("theme")||"light"); themeSel.value = localStorage.getItem("theme")||"light";
 
-  const wVal = parseFloat(wInput.value);
-  const hVal = parseFloat(hInput.value);
+  // unit switching with live conversion
+  unitSel.addEventListener("change", ()=>{
+    const target = unitSel.value;
+    if(target===currentUnit) return;
 
-  if(newUnit==="imperial"){ // convert existing metric to imperial
-    if(!isNaN(wVal)) wInput.value = two(toImperialFromMetric(wVal, 0).lb);
-    if(!isNaN(hVal)) hInput.value = two(toImperialFromMetric(0, hVal).in);
-    wLabel.textContent = "Weight (lb)";
-    hLabel.textContent = "Height (in)";
-    currentUnit = "imperial";
-  } else { // convert imperial to metric
-    if(!isNaN(wVal)) wInput.value = two(toMetricFromImperial(wVal, 0).kg);
-    if(!isNaN(hVal)) hInput.value = two(toMetricFromImperial(0, hVal).cm);
-    wLabel.textContent = "Weight (kg)";
-    hLabel.textContent = "Height (cm)";
-    currentUnit = "metric";
-  }
-  updateURLParams();
-});
-
-/* ---------- dark mode ---------- */
-function applyTheme(){
-  const theme = localStorage.getItem("theme") || "light";
-  document.documentElement.setAttribute("data-theme", theme);
-  darkToggle.checked = theme==="dark";
-}
-darkToggle.addEventListener("change", ()=>{
-  const theme = darkToggle.checked ? "dark" : "light";
-  localStorage.setItem("theme", theme);
-  applyTheme();
-});
-applyTheme();
-
-/* ---------- calculator ---------- */
-function calculate(){
-  // read
-  let w = parseFloat(wInput.value);
-  let h = parseFloat(hInput.value);
-  const a = parseFloat($("age").value);
-  const sex = $("sex").value;
-  const activity = parseFloat($("activity").value);
-  const steps = parseFloat($("steps").value)||0;
-  const gym = parseInt($("gym").value);
-  const goal = $("goal").value;
-
-  if(!w || !h || !a){ alert("Please fill in weight, height, and age."); return; }
-
-  // convert to metric if user entered imperial
-  if(currentUnit==="imperial"){
-    const m = toMetricFromImperial(w, h);
-    w = m.kg; h = m.cm;
-  }
-
-  // 1) BMR & TDEE
-  const BMR = calcBMR(sex,w,h,a);
-  const TDEE = BMR * activity;
-
-  // 2) Activity adjustments (simple robust model)
-  const stepBurn = (steps/1000)*30;   // ~30 kcal per 1k steps
-  const gymBurn  = gym*280;           // ~45 min strength
-  const totalBurn = TDEE + stepBurn + gymBurn;
-
-  // 3) Goal
-  let targetCal = totalBurn;
-  if(goal==="cut")    targetCal -= 550;
-  if(goal==="recomp") targetCal -= 400;
-
-  // 4) Macros (protein 2.2 g/kg; fat 25% kcal; carbs remainder)
-  const protein = w*2.2;
-  const fat = (targetCal*0.25)/9;
-  const carbs = Math.max(0, (targetCal - (protein*4 + fat*9))/4);
-
-  // 5) Weekly fat loss estimate
-  const deficit = Math.max(0, totalBurn - targetCal);
-  const weeklyLoss = deficit*7/7700;
-
-  // display
-  $("result").innerHTML = `
-    <p><b>BMR:</b> ${round(BMR)} kcal/day</p>
-    <p><b>TDEE (Maintenance):</b> ${round(TDEE)} kcal/day</p>
-    <p><b>Extra from Steps:</b> ${round(stepBurn)} kcal</p>
-    <p><b>Extra from Gym:</b> ${round(gymBurn)} kcal</p>
-    <hr>
-    <p><b>Total Daily Burn:</b> ${round(totalBurn)} kcal</p>
-    <p><b>Target Calories (${goal}):</b> ${round(targetCal)} kcal/day</p>
-    <hr>
-    <p><b>Macros:</b> Protein ${round(protein)} g • Carbs ${round(carbs)} g • Fat ${round(fat)} g</p>
-    <p class="muted">Est. weekly fat loss: ${two(weeklyLoss)} kg/week (if target is followed).</p>
-  `;
-
-  const unitNote = currentUnit==="metric" ? "kg/cm" : "lb/in";
-  const summary = [
-    `Lean-Cut & Recomp — Daily Target`,
-    `Inputs (${unitNote}): Weight=${two(currentUnit==="metric"?w:toImperialFromMetric(w,0).lb)} | Height=${two(currentUnit==="metric"?h:toImperialFromMetric(0,h).in)} | Age=${a} | Sex=${sex}`,
-    `Activity Multiplier: ${activity} | Steps: ${steps} | Gym: ${gym ? "Yes" : "No"} | Goal: ${goal}`,
-    ``,
-    `BMR: ${round(BMR)} kcal`,
-    `Maintenance (TDEE): ${round(TDEE)} kcal`,
-    `+ Steps: ${round(stepBurn)} kcal | + Gym: ${round(gymBurn)} kcal`,
-    `Total Daily Burn: ${round(totalBurn)} kcal`,
-    `Target Calories: ${round(targetCal)} kcal/day`,
-    `Macros → Protein: ${round(protein)} g | Carbs: ${round(carbs)} g | Fat: ${round(fat)} g`,
-    `Est. weekly fat loss: ${two(weeklyLoss)} kg/week`,
-    ``,
-    `MyFitnessPal tip: paste this into your diary notes for today.`
-  ].join("\n");
-  $("summary").value = summary;
-
-  updateURLParams();
-}
-
-/* ---------- exports ---------- */
-function copyToClipboard(){
-  const ta = $("summary");
-  if(!ta.value.trim()){ alert("Please click Calculate first."); return; }
-  ta.select(); ta.setSelectionRange(0, 99999);
-  navigator.clipboard.writeText(ta.value).then(()=>alert("Copied! Paste into MyFitnessPal notes."));
-}
-function downloadTxt(){
-  const txt = $("summary").value.trim();
-  if(!txt){ alert("Please click Calculate first."); return; }
-  const blob = new Blob([txt], {type:"text/plain;charset=utf-8"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `lean-cut-summary-${new Date().toISOString().split("T")[0]}.txt`;
-  document.body.appendChild(a); a.click(); URL.revokeObjectURL(url); a.remove();
-}
-function downloadCSV(){
-  // minimal CSV of key outputs & inputs
-  const fields = [
-    "date","unit_system","weight","height","age","sex","activity","steps","gym","goal",
-    "BMR","TDEE","step_kcal","gym_kcal","total_burn","target_kcal","protein_g","carbs_g","fat_g","weekly_loss_kg"
-  ];
-  // pull latest computed values by re-running silently (requires fields present)
-  const wRaw = parseFloat(wInput.value), hRaw = parseFloat(hInput.value);
-  const a = parseFloat($("age").value); const sex = $("sex").value;
-  const activity = parseFloat($("activity").value);
-  const steps = parseFloat($("steps").value)||0; const gym = parseInt($("gym").value);
-  const goal = $("goal").value;
-
-  if(!wRaw || !hRaw || !a){ alert("Please fill inputs and Calculate first."); return; }
-
-  let w=wRaw, h=hRaw;
-  if(currentUnit==="imperial"){ const m=toMetricFromImperial(wRaw,hRaw); w=m.kg; h=m.cm; }
-
-  const BMR = calcBMR(sex,w,h,a);
-  const TDEE = BMR*activity;
-  const stepBurn = (steps/1000)*30;
-  const gymBurn = gym*280;
-  const totalBurn = TDEE + stepBurn + gymBurn;
-  let targetCal = totalBurn; if(goal==="cut") targetCal -= 550; if(goal==="recomp") targetCal -= 400;
-  const protein = w*2.2; const fat=(targetCal*0.25)/9; const carbs=Math.max(0,(targetCal-(protein*4+fat*9))/4);
-  const weeklyLoss = Math.max(0,(totalBurn-targetCal))*7/7700;
-
-  const values = [
-    new Date().toISOString().split("T")[0],
-    currentUnit,
-    two(wRaw), two(hRaw), a, sex, activity, steps, gym, goal,
-    round(BMR), round(TDEE), round(stepBurn), round(gymBurn), round(totalBurn), round(targetCal),
-    round(protein), round(carbs), round(fat), two(weeklyLoss)
-  ];
-  const csv = [fields.join(","), values.join(",")].join("\n");
-  const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
-  const url = URL.createObjectURL(blob); const aEl = document.createElement("a");
-  aEl.href = url; aEl.download = `lean-cut-results-${new Date().toISOString().split("T")[0]}.csv`;
-  document.body.appendChild(aEl); aEl.click(); URL.revokeObjectURL(url); aEl.remove();
-}
-
-/* ---------- shareable URL params ---------- */
-function updateURLParams(){
-  const params = new URLSearchParams({
-    unit: currentUnit,
-    weight: wInput.value,
-    height: hInput.value,
-    age: $("age").value,
-    sex: $("sex").value,
-    activity: $("activity").value,
-    steps: $("steps").value,
-    gym: $("gym").value,
-    goal: $("goal").value,
-    theme: document.documentElement.getAttribute("data-theme")
+    const wVal = parseFloat(wInput.value), hVal = parseFloat(hInput.value);
+    if(target==="imperial"){
+      if(!isNaN(wVal)) wInput.value = two(toImperialFromMetric(wVal,0).lb);
+      if(!isNaN(hVal)) hInput.value = two(toImperialFromMetric(0,hVal).in);
+      wLabel.textContent="Weight (lb)"; hLabel.textContent="Height (in)";
+      currentUnit="imperial";
+    } else {
+      if(!isNaN(wVal)) wInput.value = two(toMetricFromImperial(wVal,0).kg);
+      if(!isNaN(hVal)) hInput.value = two(toMetricFromImperial(0,hVal).cm);
+      wLabel.textContent="Weight (kg)"; hLabel.textContent="Height (cm)";
+      currentUnit="metric";
+    }
+    updateURL();
   });
-  history.replaceState(null,"",`${location.pathname}?${params.toString()}`);
-}
-(function initFromQuery(){
-  const q = new URLSearchParams(location.search);
-  const set = (id,val)=>{ if(val!==null) $(id).value = val; };
-  const unit = q.get("unit");
-  if(unit && (unit==="metric"||unit==="imperial")){
-    unitSystem.value = unit; unitSystem.dispatchEvent(new Event("change"));
+
+  function calculate(){
+    let w = parseFloat($("weight").value);
+    let h = parseFloat($("height").value);
+    const a = parseFloat($("age").value);
+    const sex = $("sex").value;
+    const activity = parseFloat($("activity").value);
+    const steps = parseFloat($("steps").value)||0;
+    const gym = parseInt($("gym").value);
+    const goal = $("goal").value;
+
+    if(!w || !h || !a){ alert("Please fill weight, height, and age."); return; }
+    if(currentUnit==="imperial"){ const m = toMetricFromImperial(w,h); w=m.kg; h=m.cm; }
+
+    const BMR = calcBMR(sex,w,h,a);
+    const TDEE = BMR * activity;
+
+    const stepBurn = (steps/1000)*30;
+    const gymBurn  = gym*280;
+    const totalBurn = TDEE + stepBurn + gymBurn;
+
+    let targetCal = totalBurn;
+    if(goal==="cut")    targetCal -= 550;
+    if(goal==="recomp") targetCal -= 400;
+
+    const protein = w*2.2;
+    const fat = (targetCal*0.25)/9;
+    const carbs = Math.max(0, (targetCal - (protein*4 + fat*9))/4);
+
+    const deficit = Math.max(0, totalBurn - targetCal);
+    const weeklyLoss = deficit*7/7700;
+
+    $("result").innerHTML = `
+      <div class="kvs">
+        <div class="kv"><b>BMR</b><span>${round(BMR)} kcal</span></div>
+        <div class="kv"><b>Maintenance (TDEE)</b><span>${round(TDEE)} kcal</span></div>
+        <div class="kv"><b>+ Steps</b><span>${round(stepBurn)} kcal</span></div>
+        <div class="kv"><b>+ Gym</b><span>${round(gymBurn)} kcal</span></div>
+        <div class="kv"><b>Total Daily Burn</b><span>${round(totalBurn)} kcal</span></div>
+        <div class="kv"><b>Target Calories</b><span>${round(targetCal)} kcal</span></div>
+        <div class="kv"><b>Protein</b><span>${round(protein)} g</span></div>
+        <div class="kv"><b>Carbs</b><span>${round(carbs)} g</span></div>
+        <div class="kv"><b>Fat</b><span>${round(fat)} g</span></div>
+        <div class="kv"><b>Est. weekly fat loss</b><span>${two(weeklyLoss)} kg</span></div>
+      </div>
+    `;
+
+    const unitNote = currentUnit==="metric" ? "kg/cm" : "lb/in";
+    const summary = [
+      "Lean-Cut & Recomp — Daily Target",
+      `Inputs (${unitNote}): Weight=${two(currentUnit==="metric"?w:toImperialFromMetric(w,0).lb)} | Height=${two(currentUnit==="metric"?h:toImperialFromMetric(0,h).in)} | Age=${a} | Sex=${sex}`,
+      `Activity Multiplier: ${activity} | Steps: ${steps} | Gym: ${gym ? "Yes" : "No"} | Goal: ${goal}`,
+      "",
+      `BMR: ${round(BMR)} kcal`,
+      `Maintenance (TDEE): ${round(TDEE)} kcal`,
+      `+ Steps: ${round(stepBurn)} kcal | + Gym: ${round(gymBurn)} kcal`,
+      `Total Daily Burn: ${round(totalBurn)} kcal`,
+      `Target Calories: ${round(targetCal)} kcal/day`,
+      `Macros → Protein: ${round(protein)} g | Carbs: ${round(carbs)} g | Fat: ${round(fat)} g`,
+      `Est. weekly fat loss: ${two(weeklyLoss)} kg/week`
+    ].join("\n");
+    $("summary").value = summary;
+
+    updateURL();
   }
-  ["weight","height","age","sex","activity","steps","gym","goal"].forEach(k=>{
-    if(q.has(k)) set(k,q.get(k));
-  });
-  const theme = q.get("theme");
-  if(theme){ localStorage.setItem("theme", theme); applyTheme(); }
-})();
+
+  function copyToClipboard(){
+    const t = $("summary").value.trim();
+    if(!t){ alert("Please click Calculate first."); return; }
+    navigator.clipboard.writeText(t).then(()=>alert("Copied summary."));
+  }
+
+  function downloadTxt(){
+    const t = $("summary").value.trim();
+    if(!t){ alert("Please click Calculate first."); return; }
+    const blob = new Blob([t], {type:"text/plain;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `lean-cut-summary-${new Date().toISOString().split("T")[0]}.txt`;
+    document.body.appendChild(a); a.click(); URL.revokeObjectURL(url); a.remove();
+  }
+
+  function downloadCSV(){
+    // capture inputs
+    const wRaw = parseFloat($("weight").value);
+    const hRaw = parseFloat($("height").value);
+    const a = parseFloat($("age").value);
+    const sex = $("sex").value;
+    const activity = parseFloat($("activity").value);
+    const steps = parseFloat($("steps").value)||0;
+    const gym = parseInt($("gym").value);
+    const goal = $("goal").value;
+
+    if(!wRaw || !hRaw || !a){ alert("Please fill inputs and Calculate first."); return; }
+
+    let w=wRaw, h=hRaw;
+    if(currentUnit==="imperial"){ const m=toMetricFromImperial(wRaw,hRaw); w=m.kg; h=m.cm; }
+
+    const BMR = calcBMR(sex,w,h,a);
+    const TDEE = BMR*activity;
+    const stepBurn = (steps/1000)*30;
+    const gymBurn = gym*280;
+    const totalBurn = TDEE + stepBurn + gymBurn;
+    let targetCal = totalBurn; if(goal==="cut") targetCal -= 550; if(goal==="recomp") targetCal -= 400;
+    const protein = w*2.2; const fat=(targetCal*0.25)/9; const carbs=Math.max(0,(targetCal-(protein*4+fat*9))/4);
+    const weeklyLoss = Math.max(0,(totalBurn-targetCal))*7/7700;
+
+    const fields = [
+      "date","unit","weight_input","height_input","age","sex","activity","steps","gym","goal",
+      "BMR","TDEE","step_kcal","gym_kcal","total_burn","target_kcal","protein_g","carbs_g","fat_g","weekly_loss_kg"
+    ];
+    const values = [
+      new Date().toISOString().split("T")[0],
+      currentUnit, two(wRaw), two(hRaw), a, sex, activity, steps, gym, goal,
+      round(BMR), round(TDEE), round(stepBurn), round(gymBurn), round(totalBurn), round(targetCal),
+      round(protein), round(carbs), round(fat), two(weeklyLoss)
+    ];
+    const csv = [fields.join(","), values.join(",")].join("\n");
+    const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const aEl = document.createElement("a"); aEl.href = url;
+    aEl.download = `lean-cut-results-${new Date().toISOString().split("T")[0]}.csv`;
+    document.body.appendChild(aEl); aEl.click(); URL.revokeObjectURL(url); aEl.remove();
+  }
+
+  function updateURL(){
+    const params = new URLSearchParams({
+      unit: $("unitSystem").value,
+      theme: $("themeSelect").value,
+      weight: $("weight").value,
+      height: $("height").value,
+      age: $("age").value,
+      sex: $("sex").value,
+      activity: $("activity").value,
+      steps: $("steps").value,
+      gym: $("gym").value,
+      goal: $("goal").value
+    });
+    history.replaceState(null,"",`${location.pathname}?${params.toString()}`);
+  }
+
+  // init from URL (share prefilled)
+  (function initFromQuery(){
+    const q = new URLSearchParams(location.search);
+    const get = (k)=>q.get(k);
+    const set = (id,val)=>{ if(val!=null) $(id).value = val; };
+
+    const unit = get("unit"); if(unit && (unit==="metric"||unit==="imperial")) { $("unitSystem").value = unit; $("unitSystem").dispatchEvent(new Event("change")); }
+    const theme = get("theme") || localStorage.getItem("theme") || "light";
+    $("themeSelect").value = theme; document.documentElement.setAttribute("data-theme", theme); localStorage.setItem("theme", theme);
+
+    ["weight","height","age","sex","activity","steps","gym","goal"].forEach(k=> set(k,get(k)));
+  })();
 </script>
 </body>
 </html>
