@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lean Cut & Recomp Calculator</title>
+<style>
+body {font-family: Arial, sans-serif; background: #f9fafc; margin: 20px; color: #222;}
+.container {max-width: 420px; margin: auto; background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);}
+h2 {text-align: center; color: #333;}
+label {display: block; margin-top: 12px;}
+input, select {width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px;}
+button {margin-top: 20px; background: #1e90ff; color: white; border: none; padding: 10px; border-radius: 5px; width: 100%; cursor: pointer;}
+button:hover {background: #0074e8;}
+.result {margin-top: 25px; background: #eef6ff; padding: 15px; border-radius: 5px;}
+.result p {margin: 6px 0;}
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>Lean Cut & Recomp Calculator</h2>
+  <label>Weight (kg)</label>
+  <input type="number" id="weight" placeholder="e.g. 70" />
+  
+  <label>Height (cm)</label>
+  <input type="number" id="height" placeholder="e.g. 170" />
+  
+  <label>Age (yrs)</label>
+  <input type="number" id="age" placeholder="e.g. 25" />
+  
+  <label>Sex</label>
+  <select id="sex">
+    <option value="male">Male</option>
+    <option value="female">Female</option>
+  </select>
+
+  <label>Activity Level</label>
+  <select id="activity">
+    <option value="1.2">Sedentary (desk job, little exercise)</option>
+    <option value="1.375">Light (1–3 workouts/week)</option>
+    <option value="1.55">Moderate (3–5 workouts/week)</option>
+    <option value="1.725">Active (6–7 workouts/week)</option>
+    <option value="1.9">Very active (physical job + training)</option>
+  </select>
+
+  <label>Goal</label>
+  <select id="goal">
+    <option value="recomp">Recomp (slow fat loss + muscle gain)</option>
+    <option value="cut">Cut (faster fat loss)</option>
+    <option value="maintain">Maintain weight</option>
+  </select>
+
+  <button onclick="calculate()">Calculate</button>
+
+  <div class="result" id="result"></div>
+</div>
+
+<script>
+function calculate() {
+  const w = parseFloat(document.getElementById('weight').value);
+  const h = parseFloat(document.getElementById('height').value);
+  const a = parseFloat(document.getElementById('age').value);
+  const sex = document.getElementById('sex').value;
+  const activity = parseFloat(document.getElementById('activity').value);
+  const goal = document.getElementById('goal').value;
+  if(!w || !h || !a) {alert("Please fill all fields"); return;}
+
+  // Mifflin-St Jeor BMR
+  let BMR = sex === "male" ? 10*w + 6.25*h - 5*a + 5 : 10*w + 6.25*h - 5*a - 161;
+  let TDEE = BMR * activity;
+
+  let targetCal = TDEE;
+  if(goal === "cut") targetCal = TDEE - 500;
+  if(goal === "recomp") targetCal = TDEE - 350;
+
+  // Macros
+  let protein = w * 2.2; // g
+  let fat = (targetCal * 0.25) / 9;
+  let carbs = (targetCal - (protein*4 + fat*9)) / 4;
+
+  // Round
+  const r = (n) => Math.round(n);
+  document.getElementById('result').innerHTML = `
+    <p><b>BMR:</b> ${r(BMR)} kcal/day</p>
+    <p><b>TDEE (Maintenance):</b> ${r(TDEE)} kcal/day</p>
+    <p><b>Target Calories (${goal}):</b> ${r(targetCal)} kcal/day</p>
+    <hr>
+    <p><b>Protein:</b> ${r(protein)} g</p>
+    <p><b>Carbs:</b> ${r(carbs)} g</p>
+    <p><b>Fat:</b> ${r(fat)} g</p>
+  `;
+}
+</script>
+</body>
+</html>
